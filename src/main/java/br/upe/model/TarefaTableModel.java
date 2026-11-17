@@ -2,11 +2,12 @@ package br.upe.model;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Vector;
 
 public class TarefaTableModel extends AbstractTableModel {
+
+    private static final String[] COLUNAS = {"", "Descrição", "Prioridade"};
+
     private List<Tarefa> tarefasFinalizadas;
     private List<Tarefa> tarefasAtivas;
 
@@ -24,7 +25,12 @@ public class TarefaTableModel extends AbstractTableModel {
 
     @Override
     public int getColumnCount() {
-        return 2;
+        return COLUNAS.length;
+    }
+
+    @Override
+    public String getColumnName(int column) {
+        return COLUNAS[column];
     }
 
     @Override
@@ -33,14 +39,17 @@ public class TarefaTableModel extends AbstractTableModel {
         switch (columnIndex) {
             case 0 : return tarefa.isFinalizada();
             case 1 : return tarefa.getDescricao();
+            case 2 : return tarefa.getPrioridade();
         }
         return null;
     }
 
-    public Class getColumnClass(int c) {
+    @Override
+    public Class<?> getColumnClass(int c) {
         switch (c) {
             case 0 : return Boolean.class;
             case 1 : return String.class;
+            case 2 : return Prioridade.class;
         }
         return null;
     }
@@ -68,7 +77,6 @@ public class TarefaTableModel extends AbstractTableModel {
         }
         this.fireTableDataChanged();
     }
-
 
     public void setExibirFinalizadas(boolean selecionado) {
         this.exibirFinalizadas = selecionado;

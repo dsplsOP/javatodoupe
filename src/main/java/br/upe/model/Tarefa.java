@@ -8,13 +8,15 @@ public class Tarefa {
     private LocalDate dataCriacao;
     private LocalDate dataFinalizacao;
     private LocalDate dataVencimento;
-    private Boolean finalizada;
+    private Boolean finalizada = false;
     private int ordem;
+    private Prioridade prioridade;
 
-    public Tarefa(String texto, int ordem) {
+    public Tarefa(String texto, int ordem, Prioridade prioridade) {
         this.dataCriacao = LocalDate.now();
         this.descricao = texto;
         this.ordem = ordem;
+        this.prioridade = prioridade;
     }
 
     public String getDescricao() {
@@ -63,5 +65,13 @@ public class Tarefa {
 
     public void setOrdem(int ordem) {
         this.ordem = ordem;
+    }
+
+    public Prioridade getPrioridade() {
+        return prioridade;
+    }
+
+    public void setPrioridade(Prioridade prioridade) {
+        this.prioridade = prioridade;
     }
 }
