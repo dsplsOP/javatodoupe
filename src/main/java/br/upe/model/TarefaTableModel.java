@@ -1,45 +1,72 @@
 package br.upe.model;
 
 import javax.swing.table.AbstractTableModel;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class TarefaTableModel extends AbstractTableModel {
 
-    private static final String[] COLUNAS = {"", "Descrição", "Prioridade"};
-
-    private List<Tarefa> tarefasFinalizadas;
-    private List<Tarefa> tarefasAtivas;
+    // Lista única com TODAS as tarefas (ativas e finalizadas).
+    // O que aparece na tabela é calculado a partir dela pelos filtros abaixo.
+    private final List<Tarefa> tarefas;
 
     private boolean exibirFinalizadas;
+    private String filtroCategoria = "Todas";
 
     public TarefaTableModel() {
-        tarefasAtivas = new ArrayList<>();
-        tarefasFinalizadas = new ArrayList<>();
+        tarefas = new ArrayList<>();
+    }
+
+    // Retorna apenas as tarefas que devem aparecer na tabela agora
+    private List<Tarefa> getTarefasVisiveis() {
+        List<Tarefa> visiveis = new ArrayList<>();
+        for (Tarefa t : tarefas) {
+            boolean finalizada = Boolean.TRUE.equals(t.isFinalizada());
+
+            // Finalizada só aparece se "Exibir finalizadas" estiver marcado
+            if (finalizada && !exibirFinalizadas) {
+                continue;
+            }
+            // Filtro por categoria
+            if (!"Todas".equals(filtroCategoria) && !filtroCategoria.equals(t.getCategoria())) {
+                continue;
+            }
+            visiveis.add(t);
+        }
+        return visiveis;
     }
 
     @Override
     public int getRowCount() {
-        return tarefasAtivas.size();
+        return getTarefasVisiveis().size();
     }
 
     @Override
     public int getColumnCount() {
-        return COLUNAS.length;
+        return 4;
     }
 
     @Override
     public String getColumnName(int column) {
-        return COLUNAS[column];
+        switch (column) {
+            case 0: return "Concluída";
+            case 1: return "Descrição";
+            case 2: return "Categoria";
+            case 3: return "Prioridade";
+            default: return "";
+        }
     }
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        Tarefa tarefa = tarefasAtivas.get(rowIndex);
+        Tarefa tarefa = getTarefasVisiveis().get(rowIndex);
         switch (columnIndex) {
-            case 0 : return tarefa.isFinalizada();
-            case 1 : return tarefa.getDescricao();
-            case 2 : return tarefa.getPrioridade();
+            case 0: return tarefa.isFinalizada();
+            case 1: return tarefa.getDescricao();
+            case 2: return tarefa.getCategoria();
+            case 3: return tarefa.getPrioridade();
         }
         return null;
     }
@@ -47,11 +74,12 @@ public class TarefaTableModel extends AbstractTableModel {
     @Override
     public Class<?> getColumnClass(int c) {
         switch (c) {
-            case 0 : return Boolean.class;
-            case 1 : return String.class;
-            case 2 : return Prioridade.class;
+            case 0: return Boolean.class;
+            case 1: return String.class;
+            case 2: return String.class;
+            case 3: return Prioridade.class;
         }
-        return null;
+        return Object.class;
     }
 
     @Override
@@ -61,51 +89,55 @@ public class TarefaTableModel extends AbstractTableModel {
 
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-        Tarefa tarefa = tarefasAtivas.get(rowIndex);
-        tarefa.setFinalizada((Boolean) aValue);
-        if (this.exibirFinalizadas) {
-            if ((Boolean) aValue) {
-                tarefasFinalizadas.add(tarefa);
-            } else {
-                tarefasFinalizadas.remove(tarefa);
-            }
-        } else {
-            if ((Boolean) aValue) {
-                tarefasAtivas.remove(tarefa);
-                tarefasFinalizadas.add(tarefa);
-            }
+        if (columnIndex != 0) {
+            return;
         }
+        Tarefa tarefa = getTarefasVisiveis().get(rowIndex);
+        boolean finalizada = (Boolean) aValue;
+        tarefa.setFinalizada(finalizada);
+        tarefa.setDataFinalizacao(finalizada ? LocalDate.now() : null);
+
+        // Recalcula a tabela: se "Exibir finalizadas" estiver desmarcado,
+        // a tarefa recém-finalizada some da lista automaticamente.
         this.fireTableDataChanged();
+    }
+
+    // ---------- Operações usadas pelo controlador ----------
+
+    public void adicionarTarefa(Tarefa tarefa) {
+        tarefas.add(tarefa);
+        this.fireTableDataChanged();
+    }
+
+    public int getTotalTarefas() {
+        return tarefas.size();
     }
 
     public void setExibirFinalizadas(boolean selecionado) {
         this.exibirFinalizadas = selecionado;
-        if (this.exibirFinalizadas) {
-            this.tarefasAtivas.addAll(this.tarefasFinalizadas);
-        } else {
-            this.tarefasAtivas.removeAll(this.tarefasFinalizadas);
-        }
         this.fireTableDataChanged();
-    }
-
-    public List<Tarefa> getTarefasFinalizadas() {
-        return tarefasFinalizadas;
-    }
-
-    public void setTarefasFinalizadas(List<Tarefa> tarefasFinalizadas) {
-        this.tarefasFinalizadas = tarefasFinalizadas;
-    }
-
-    public List<Tarefa> getTarefasAtivas() {
-        return tarefasAtivas;
-    }
-
-    public void setTarefasAtivas(List<Tarefa> tarefasAtivas) {
-        this.tarefasAtivas = tarefasAtivas;
     }
 
     public boolean isExibirFinalizadas() {
         return exibirFinalizadas;
     }
 
+    public void setFiltroCategoria(String categoria) {
+        this.filtroCategoria = (categoria == null) ? "Todas" : categoria;
+        this.fireTableDataChanged();
+    }
+
+    // Ordena a lista inteira; os filtros continuam valendo por cima
+    public void ordenarPorPrioridade(boolean maisUrgentePrimeiro) {
+        Comparator<Tarefa> comparador = Comparator.comparing(Tarefa::getPrioridade);
+        if (maisUrgentePrimeiro) {
+            comparador = comparador.reversed();
+        }
+        tarefas.sort(comparador);
+        this.fireTableDataChanged();
+    }
+
+    public List<Tarefa> getTodasTarefas() {
+        return tarefas;
+    }
 }

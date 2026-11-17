@@ -2,14 +2,14 @@
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="br.upe.ui.TelaPrincipal">
 <grid id="27dc6" binding="pnlMain" layout-manager="BorderLayout" hgap="0" vgap="0">
 <constraints>
-<xy x="20" y="20" width="500" height="400"/>
+<xy x="20" y="20" width="542" height="400"/>
 </constraints>
 <properties>
-<preferredSize width="700" height="600"/>
+<preferredSize width="900" height="500"/>
 </properties>
 <border type="none"/>
 <children>
-<grid id="70247" binding="pnlAdicionar" layout-manager="GridLayoutManager" row-count="1" column-count="5" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+<grid id="70247" binding="pnlAdicionar" layout-manager="GridLayoutManager" row-count="1" column-count="7" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
 <margin top="0" left="0" bottom="0" right="0"/>
 <constraints border-constraint="North"/>
 <properties/>
@@ -23,15 +23,21 @@
 </constraints>
 <properties/>
 </component>
-<component id="5b1e2" class="javax.swing.JComboBox" binding="cmbPrioridade">
+<component id="cdd32" class="javax.swing.JComboBox" binding="cmbCategoria">
 <constraints>
 <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
 </constraints>
 <properties/>
 </component>
+<component id="5b1e2" class="javax.swing.JComboBox" binding="cmbPrioridade">
+<constraints>
+<grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+</constraints>
+<properties/>
+</component>
 <component id="9298c" class="javax.swing.JButton" binding="btnAdicionarTarefa">
 <constraints>
-<grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+<grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
 </constraints>
 <properties>
 <text value="Adicionar"/>
@@ -39,7 +45,7 @@
 </component>
 <component id="7c4d9" class="javax.swing.JButton" binding="btnOrdenarPrioridade">
 <constraints>
-<grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+<grid row="0" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
 </constraints>
 <properties>
 <text value="Ordenar por prioridade"/>
@@ -47,20 +53,33 @@
 </component>
 <component id="3a0a3" class="javax.swing.JCheckBox" binding="chkExibirFinalizadas">
 <constraints>
-<grid row="0" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+<grid row="0" column="5" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
 </constraints>
 <properties>
 <text value="Exibir Finalizadas"/>
 </properties>
 </component>
+<component id="e7f21" class="javax.swing.JComboBox" binding="cmbFiltroCategoria">
+<constraints>
+<grid row="0" column="6" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+</constraints>
+<properties/>
+</component>
 </children>
 </grid>
-<component id="a4d44" class="javax.swing.JTable" binding="tblTarefas" custom-create="true">
+<scrollpane id="b1c2d" class="javax.swing.JScrollPane">
 <constraints border-constraint="Center"/>
+<properties/>
+<border type="none"/>
+<children>
+<component id="a4d44" class="javax.swing.JTable" binding="tblTarefas" custom-create="true">
+<constraints/>
 <properties>
 <surrendersFocusOnKeystroke value="true"/>
 </properties>
 </component>
+</children>
+</scrollpane>
 </children>
 </grid>
 </form>

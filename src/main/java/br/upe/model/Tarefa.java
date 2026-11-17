@@ -5,18 +5,29 @@ import java.time.LocalDate;
 public class Tarefa {
 
     private String descricao;
+    private String categoria;
     private LocalDate dataCriacao;
     private LocalDate dataFinalizacao;
     private LocalDate dataVencimento;
-    private Boolean finalizada = false;
+    private Boolean finalizada;
     private int ordem;
     private Prioridade prioridade;
 
-    public Tarefa(String texto, int ordem, Prioridade prioridade) {
+    public Tarefa(String texto, String categoria, int ordem, Prioridade prioridade) {
         this.dataCriacao = LocalDate.now();
         this.descricao = texto;
+        this.categoria = categoria;
         this.ordem = ordem;
         this.prioridade = prioridade;
+        this.finalizada = false;
+    }
+
+    public String getCategoria() {
+        return categoria;
+    }
+
+    public void setCategoria(String categoria) {
+        this.categoria = categoria;
     }
 
     public String getDescricao() {

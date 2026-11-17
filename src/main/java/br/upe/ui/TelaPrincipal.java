@@ -9,12 +9,14 @@ import javax.swing.*;
 public class TelaPrincipal {
     private JPanel pnlMain;
     private JTextField txtDescricaoTarefa;
+    private JComboBox<String> cmbCategoria;
+    private JComboBox<Prioridade> cmbPrioridade;
+    private JComboBox<String> cmbFiltroCategoria;
     private JButton btnAdicionarTarefa;
+    private JButton btnOrdenarPrioridade;
     private JPanel pnlAdicionar;
     private JTable tblTarefas;
     private JCheckBox chkExibirFinalizadas;
-    private JComboBox<Prioridade> cmbPrioridade;
-    private JButton btnOrdenarPrioridade;
 
     private TarefaControlador controlador;
     private boolean maisUrgentePrimeiro = true;
@@ -22,10 +24,21 @@ public class TelaPrincipal {
     public TelaPrincipal() {
         super();
 
+        String[] categorias = {"Saúde", "Trabalho", "Estudo", "Casa",
+                "Pessoal", "Família", "Financeiro", "Outros"};
+
+        cmbFiltroCategoria.addItem("Todas");
+        for (String c : categorias) {
+            cmbCategoria.addItem(c);
+            cmbFiltroCategoria.addItem(c);
+        }
+
         cmbPrioridade.setModel(new DefaultComboBoxModel<>(Prioridade.values()));
 
         btnAdicionarTarefa.addActionListener(e -> {
-            adicionarTarefa(txtDescricaoTarefa.getText());
+            String categoria = (String) cmbCategoria.getSelectedItem();
+            Prioridade prioridade = (Prioridade) cmbPrioridade.getSelectedItem();
+            adicionarTarefa(txtDescricaoTarefa.getText(), categoria, prioridade);
             txtDescricaoTarefa.setText("");
         });
 
@@ -34,17 +47,20 @@ public class TelaPrincipal {
             controlador.exibirFinalizadas(selecionado);
         });
 
+        cmbFiltroCategoria.addActionListener(e ->
+                controlador.filtrarPorCategoria((String) cmbFiltroCategoria.getSelectedItem())
+        );
+
         btnOrdenarPrioridade.addActionListener(e -> {
             controlador.ordenarPorPrioridade(maisUrgentePrimeiro);
             maisUrgentePrimeiro = !maisUrgentePrimeiro; // alterna a cada clique
         });
     }
 
-    private void adicionarTarefa(String texto) {
-        Prioridade prioridade = (Prioridade) cmbPrioridade.getSelectedItem();
-        int ordem = controlador.getTarefaTableModel().getTarefasAtivas().size();
-        Tarefa tarefa = new Tarefa(texto, ordem, prioridade);
-        controlador.adicionarTarefaAtiva(tarefa);
+    private void adicionarTarefa(String texto, String categoria, Prioridade prioridade) {
+        int ordem = controlador.getTarefaTableModel().getTotalTarefas();
+        Tarefa tarefa = new Tarefa(texto, categoria, ordem, prioridade);
+        controlador.adicionarTarefa(tarefa);
     }
 
     public JPanel getPnlMain() {
@@ -54,7 +70,7 @@ public class TelaPrincipal {
     private void createUIComponents() {
         controlador = new TarefaControlador();
         tblTarefas = new JTable(controlador.getTarefaTableModel());
-        tblTarefas.getColumnModel().getColumn(0).setMaxWidth(20);
+        tblTarefas.getColumnModel().getColumn(0).setMaxWidth(80);
     }
 
 }
