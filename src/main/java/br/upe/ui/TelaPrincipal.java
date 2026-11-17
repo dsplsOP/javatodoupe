@@ -13,13 +13,11 @@ public class TelaPrincipal {
     private JComboBox<Prioridade> cmbPrioridade;
     private JComboBox<String> cmbFiltroCategoria;
     private JButton btnAdicionarTarefa;
-    private JButton btnOrdenarPrioridade;
     private JPanel pnlAdicionar;
     private JTable tblTarefas;
     private JCheckBox chkExibirFinalizadas;
 
     private TarefaControlador controlador;
-    private boolean maisUrgentePrimeiro = true;
 
     public TelaPrincipal() {
         super();
@@ -50,11 +48,6 @@ public class TelaPrincipal {
         cmbFiltroCategoria.addActionListener(e ->
                 controlador.filtrarPorCategoria((String) cmbFiltroCategoria.getSelectedItem())
         );
-
-        btnOrdenarPrioridade.addActionListener(e -> {
-            controlador.ordenarPorPrioridade(maisUrgentePrimeiro);
-            maisUrgentePrimeiro = !maisUrgentePrimeiro; // alterna a cada clique
-        });
     }
 
     private void adicionarTarefa(String texto, String categoria, Prioridade prioridade) {
@@ -70,6 +63,7 @@ public class TelaPrincipal {
     private void createUIComponents() {
         controlador = new TarefaControlador();
         tblTarefas = new JTable(controlador.getTarefaTableModel());
+        tblTarefas.setAutoCreateRowSorter(true); // clique no cabeçalho para ordenar
         tblTarefas.getColumnModel().getColumn(0).setMaxWidth(80);
     }
 
