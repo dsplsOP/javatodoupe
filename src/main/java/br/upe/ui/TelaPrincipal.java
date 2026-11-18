@@ -13,6 +13,7 @@ public class TelaPrincipal {
     private JComboBox<Prioridade> cmbPrioridade;
     private JComboBox<String> cmbFiltroCategoria;
     private JButton btnAdicionarTarefa;
+    private JButton btnExcluirTarefa;
     private JPanel pnlAdicionar;
     private JTable tblTarefas;
     private JCheckBox chkExibirFinalizadas;
@@ -48,6 +49,39 @@ public class TelaPrincipal {
         cmbFiltroCategoria.addActionListener(e ->
                 controlador.filtrarPorCategoria((String) cmbFiltroCategoria.getSelectedItem())
         );
+
+        btnExcluirTarefa.addActionListener(e -> excluirTarefasSelecionadas());
+    }
+
+    private void excluirTarefasSelecionadas() {
+        // Se houver uma célula em edição, confirma a edição antes de excluir
+        if (tblTarefas.isEditing()) {
+            tblTarefas.getCellEditor().stopCellEditing();
+        }
+
+        int[] linhasTela = tblTarefas.getSelectedRows();
+        if (linhasTela.length == 0) {
+            JOptionPane.showMessageDialog(pnlMain,
+                    "Selecione na tabela a tarefa que deseja excluir.",
+                    "Excluir tarefa", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        String mensagem = (linhasTela.length == 1)
+                ? "Deseja excluir a tarefa selecionada?"
+                : "Deseja excluir as " + linhasTela.length + " tarefas selecionadas?";
+        int resposta = JOptionPane.showConfirmDialog(pnlMain, mensagem,
+                "Confirmar exclusão", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        if (resposta != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        // A tabela pode estar ordenada pelo cabeçalho: converte linha da tela -> linha do modelo
+        int[] linhasModelo = new int[linhasTela.length];
+        for (int i = 0; i < linhasTela.length; i++) {
+            linhasModelo[i] = tblTarefas.convertRowIndexToModel(linhasTela[i]);
+        }
+        controlador.excluirTarefas(linhasModelo);
     }
 
     private void adicionarTarefa(String texto, String categoria, Prioridade prioridade) {

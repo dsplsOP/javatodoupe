@@ -113,6 +113,37 @@ public class TarefaTableModel extends AbstractTableModel {
         return tarefas.size();
     }
 
+    // Substitui todas as tarefas (usado ao carregar o arquivo salvo)
+    public void setTarefas(List<Tarefa> novasTarefas) {
+        tarefas.clear();
+        tarefas.addAll(novasTarefas);
+        renumerarOrdem();
+        this.fireTableDataChanged();
+    }
+
+    // Remove as tarefas das linhas informadas.
+    // As linhas são índices do MODELO (não da tela), pois a tabela pode estar
+    // ordenada ou filtrada.
+    public void removerTarefas(int[] linhasModelo) {
+        List<Tarefa> visiveis = getTarefasVisiveis();
+        List<Tarefa> remover = new ArrayList<>();
+        for (int linha : linhasModelo) {
+            if (linha >= 0 && linha < visiveis.size()) {
+                remover.add(visiveis.get(linha));
+            }
+        }
+        tarefas.removeAll(remover);
+        renumerarOrdem();
+        this.fireTableDataChanged();
+    }
+
+    // Mantém o campo "ordem" coerente (0, 1, 2...) depois de carregar/excluir
+    private void renumerarOrdem() {
+        for (int i = 0; i < tarefas.size(); i++) {
+            tarefas.get(i).setOrdem(i);
+        }
+    }
+
     public void setExibirFinalizadas(boolean selecionado) {
         this.exibirFinalizadas = selecionado;
         this.fireTableDataChanged();
