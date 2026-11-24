@@ -45,7 +45,7 @@ public class TarefaTableModel extends AbstractTableModel {
 
     @Override
     public int getColumnCount() {
-        return 4;
+        return 5;
     }
 
     @Override
@@ -55,6 +55,7 @@ public class TarefaTableModel extends AbstractTableModel {
             case 1: return "Descrição";
             case 2: return "Categoria";
             case 3: return "Prioridade";
+            case 4: return "Vencimento";
             default: return "";
         }
     }
@@ -67,6 +68,7 @@ public class TarefaTableModel extends AbstractTableModel {
             case 1: return tarefa.getDescricao();
             case 2: return tarefa.getCategoria();
             case 3: return tarefa.getPrioridade();
+            case 4: return tarefa.getDataVencimento();
         }
         return null;
     }
@@ -78,6 +80,7 @@ public class TarefaTableModel extends AbstractTableModel {
             case 1: return String.class;
             case 2: return String.class;
             case 3: return Prioridade.class;
+            case 4: return LocalDate.class;
         }
         return Object.class;
     }
@@ -89,6 +92,11 @@ public class TarefaTableModel extends AbstractTableModel {
 
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+        if (columnIndex == 4) {
+            getTarefasVisiveis().get(rowIndex).setDataVencimento((LocalDate) aValue);
+            this.fireTableDataChanged(); // também dispara o salvamento automático
+            return;
+        }
         if (columnIndex != 0) {
             return;
         }

@@ -1,5 +1,6 @@
 package br.upe.controller;
 
+import br.upe.model.Estatisticas;
 import br.upe.model.Tarefa;
 import br.upe.model.TarefaTableModel;
 import br.upe.persistence.TarefaRepositorio;
@@ -50,6 +51,10 @@ public class TarefaControlador {
 
     public void ordenarPorPrioridade(boolean maisUrgentePrimeiro) {
         tarefaTableModel.ordenarPorPrioridade(maisUrgentePrimeiro);
+    }
+
+    public Estatisticas getEstatisticas() {
+        return new Estatisticas(tarefaTableModel.getTodasTarefas());
     }
 
     // Getters e Setters

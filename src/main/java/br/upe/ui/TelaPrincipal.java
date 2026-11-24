@@ -3,22 +3,32 @@ package br.upe.ui;
 import br.upe.controller.TarefaControlador;
 import br.upe.model.Prioridade;
 import br.upe.model.Tarefa;
+import br.upe.model.TarefaTableModel;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class TelaPrincipal {
+    private static final DateTimeFormatter FORMATO_DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
     private JPanel pnlMain;
     private JTextField txtDescricaoTarefa;
     private JComboBox<String> cmbCategoria;
     private JComboBox<Prioridade> cmbPrioridade;
     private JComboBox<String> cmbFiltroCategoria;
     private JButton btnAdicionarTarefa;
+    private JButton btnPrazo;
     private JButton btnExcluirTarefa;
     private JPanel pnlAdicionar;
     private JTable tblTarefas;
     private JCheckBox chkExibirFinalizadas;
 
     private TarefaControlador controlador;
+    private LocalDate prazoSelecionado; // prazo escolhido para a próxima tarefa (pode ser null)
 
     public TelaPrincipal() {
         super();
@@ -33,12 +43,25 @@ public class TelaPrincipal {
         }
 
         cmbPrioridade.setModel(new DefaultComboBoxModel<>(Prioridade.values()));
+        atualizarTextoBotaoPrazo();
+
+        btnPrazo.addActionListener(e -> {
+            CalendarioDialog dialogo = new CalendarioDialog(
+                    SwingUtilities.getWindowAncestor(pnlMain), prazoSelecionado);
+            dialogo.setVisible(true);
+            if (dialogo.isConfirmado()) {
+                prazoSelecionado = dialogo.getDataSelecionada();
+                atualizarTextoBotaoPrazo();
+            }
+        });
 
         btnAdicionarTarefa.addActionListener(e -> {
             String categoria = (String) cmbCategoria.getSelectedItem();
             Prioridade prioridade = (Prioridade) cmbPrioridade.getSelectedItem();
-            adicionarTarefa(txtDescricaoTarefa.getText(), categoria, prioridade);
+            adicionarTarefa(txtDescricaoTarefa.getText(), categoria, prioridade, prazoSelecionado);
             txtDescricaoTarefa.setText("");
+            prazoSelecionado = null;
+            atualizarTextoBotaoPrazo();
         });
 
         chkExibirFinalizadas.addActionListener(e -> {
@@ -51,6 +74,12 @@ public class TelaPrincipal {
         );
 
         btnExcluirTarefa.addActionListener(e -> excluirTarefasSelecionadas());
+    }
+
+    private void atualizarTextoBotaoPrazo() {
+        btnPrazo.setText(prazoSelecionado == null
+                ? "Prazo..."
+                : "Prazo: " + prazoSelecionado.format(FORMATO_DATA));
     }
 
     private void excluirTarefasSelecionadas() {
@@ -84,9 +113,10 @@ public class TelaPrincipal {
         controlador.excluirTarefas(linhasModelo);
     }
 
-    private void adicionarTarefa(String texto, String categoria, Prioridade prioridade) {
+    private void adicionarTarefa(String texto, String categoria, Prioridade prioridade, LocalDate prazo) {
         int ordem = controlador.getTarefaTableModel().getTotalTarefas();
         Tarefa tarefa = new Tarefa(texto, categoria, ordem, prioridade);
+        tarefa.setDataVencimento(prazo);
         controlador.adicionarTarefa(tarefa);
     }
 
@@ -94,11 +124,47 @@ public class TelaPrincipal {
         return this.pnlMain;
     }
 
+    public TarefaControlador getControlador() {
+        return controlador;
+    }
+
     private void createUIComponents() {
         controlador = new TarefaControlador();
         tblTarefas = new JTable(controlador.getTarefaTableModel());
         tblTarefas.setAutoCreateRowSorter(true); // clique no cabeçalho para ordenar
         tblTarefas.getColumnModel().getColumn(0).setMaxWidth(80);
+
+        // Mostra datas como dd/MM/yyyy
+        tblTarefas.setDefaultRenderer(LocalDate.class, new DefaultTableCellRenderer() {
+            @Override
+            protected void setValue(Object value) {
+                setText(value == null ? "" : ((LocalDate) value).format(FORMATO_DATA));
+            }
+        });
+        tblTarefas.setToolTipText("Dê dois cliques na coluna Vencimento para alterar o prazo");
+
+        // Duplo clique na coluna Vencimento abre o calendário
+        tblTarefas.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getClickCount() != 2) return;
+                int linhaTela = tblTarefas.rowAtPoint(e.getPoint());
+                int colunaTela = tblTarefas.columnAtPoint(e.getPoint());
+                if (linhaTela < 0 || colunaTela < 0) return;
+                if (tblTarefas.convertColumnIndexToModel(colunaTela) != 4) return;
+
+                int linha = tblTarefas.convertRowIndexToModel(linhaTela);
+                TarefaTableModel modelo = controlador.getTarefaTableModel();
+                LocalDate atual = (LocalDate) modelo.getValueAt(linha, 4);
+
+                CalendarioDialog dialogo = new CalendarioDialog(
+                        SwingUtilities.getWindowAncestor(tblTarefas), atual);
+                dialogo.setVisible(true);
+                if (dialogo.isConfirmado()) {
+                    modelo.setValueAt(dialogo.getDataSelecionada(), linha, 4);
+                }
+            }
+        });
     }
 
 }
